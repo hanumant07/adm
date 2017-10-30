@@ -1,0 +1,173 @@
+#include <stdexcept>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+//**************************************************************************************************
+// Types
+//**************************************************************************************************
+typedef enum {
+  kGraphErrorSuccess = 0,
+  kGraphErrorNoMem = -1,
+  kGraphErrorBadArgs = -2,
+} GraphError;
+
+//**************************************************************************************************
+// Base class for vertex type
+//**************************************************************************************************
+class Vertex {
+public:
+  // Constructors
+  Vertex(int i) : id(i) {}
+  Vertex(int i, int w) : id(i), weight(w) {}
+  int getWeight() { return weight; }
+
+protected:
+  // Weight of vertex
+  int weight;
+  // Id of vertex
+  int id;
+};
+
+//**************************************************************************************************
+// Graph Edge
+//**************************************************************************************************
+class Edge {
+public:
+  int getWeight() { return weight; }
+  const Vertex *getVertex() { return end; }
+  bool operator<(const Edge &e) { return weight < e.weight; }
+
+private:
+  Edge() {}
+  Edge(int w, const Vertex *v) : weight(w), end(v) {}
+  Edge(Edge &e) {
+    weight = e.getWeight();
+    end = e.getVertex();
+  }
+  // The adjacent vertex
+  const Vertex *end;
+  // Weight if any of edge
+  int weight;
+  friend class Graph;
+};
+
+// List of edges and vertices
+typedef std::vector<const Edge *> EdgeList;
+typedef std::unordered_set<const Vertex *> VertexList;
+
+//**************************************************************************************************
+// Graph class
+//**************************************************************************************************
+class Graph {
+public:
+  int V() { return num_nodes; }
+  int E() { return num_edges; }
+  friend class VertexListIterator;
+  friend class EdgeListIterator;
+  // Iterator to iterate through vertices in a graph
+  class VertexListIterator {
+  public:
+    VertexListIterator(Graph &G) : g(G) {}
+    // Iterator operations
+    VertexListIterator &begin() {
+      v_it = g.vertex_list.begin();
+      return *this;
+    }
+    VertexListIterator &end() { return g.vertex_list_end; }
+    VertexListIterator &next() {
+      ++v_it;
+      if (v_it == g.vertex_list.end()) {
+        return g.vertex_list_end;
+      }
+      return *this;
+    }
+    // get vertex at iterator position
+    const Vertex *getVertex() {
+      if (v_it == g.vertex_list.end()) {
+        throw std::range_error("Attempt to deref empty vertex list");
+      }
+      return *v_it;
+    }
+
+  private:
+    friend class Graph;
+    VertexList::iterator v_it;
+    // Make constructors private
+    Graph &g;
+  };
+  // Iterator to iterate through all the edges from a given source vertex in a
+  // graph
+  class EdgeListIterator {
+  public:
+    EdgeListIterator(Graph &G, const Vertex *v) : g(G), source(v) {
+      if (!v || !g.validVertex(v)) {
+        throw std::invalid_argument("Invalid vertex");
+      }
+    }
+    // Get the begining iterator
+    EdgeListIterator &begin() {
+      e_it = g.adj_list[source].begin();
+      return *this;
+    }
+    // Get the end of iteration
+    EdgeListIterator &end() { return g.edge_list_end; }
+    // Move iterator to next position
+    EdgeListIterator &next() {
+      ++e_it;
+      if (e_it == g.adj_list[source].end()) {
+        return g.edge_list_end;
+      }
+      return *this;
+    }
+    // Get the edge at current iterator position
+    const Edge *getEdge() {
+      if (e_it == g.adj_list[source].end()) {
+        throw std::range_error("Attempt to deref empty edge list");
+      }
+      return *e_it;
+    }
+
+  private:
+    friend class Graph;
+    // Make constructors private to allow only Graph to create iterator
+    // instances
+    EdgeListIterator(Graph &G) : g(G) {}
+    // tracking within edgelist
+    std::vector<const Edge *>::iterator e_it;
+    // The source vertex for which edgelist iterator is created
+    const Vertex *source;
+    // The graph for which edge list iterator is constructed
+    Graph &g;
+  };
+  // Graph Constructor
+  Graph(int n, int e, bool d)
+      : num_nodes(n), num_edges(e), directed(d), edge_list_end(*this),
+        vertex_list_end(*this) {}
+  // Insert Edge variations
+  GraphError InsertEdge(const Vertex *u, const Vertex *v, int weight);
+  GraphError InsertEdge(const Vertex *u, const Vertex *v);
+  GraphError InsertEdge(int v, int u, int weight);
+  // Check if vertex is present in graph
+  bool validVertex(const Vertex *v) {
+    return vertex_list.find(v) == vertex_list.end();
+  }
+
+private:
+  // number of nodes in the graph
+  int num_nodes;
+  // number of edges in the graph
+  int num_edges;
+  // are edges directed
+  bool directed;
+  // list of vertices in the graph
+  VertexList vertex_list;
+  // vertex degree of individual intervices
+  std::unordered_map<const Vertex *, int> vertex_degree;
+  // adjacency list of vertices in the graph
+  std::unordered_map<const Vertex *, EdgeList> adj_list;
+  // end of edgelist iteration
+  EdgeListIterator edge_list_end;
+  // end of vertex list iteration
+  VertexListIterator vertex_list_end;
+};
