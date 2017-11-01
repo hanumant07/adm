@@ -10,6 +10,7 @@ typedef enum {
   kGraphErrorSuccess = 0,
   kGraphErrorNoMem = -1,
   kGraphErrorBadArgs = -2,
+  kGraphErrorSearchAbort = -3,
 } GraphError;
 
 //**************************************************************************************************
@@ -35,7 +36,7 @@ protected:
 class Edge {
 public:
   int getWeight() { return weight; }
-  const Vertex *getVertex() { return end; }
+  const Vertex *getVertex() const { return end; };
   bool operator<(const Edge &e) { return weight < e.weight; }
 
 private:
@@ -74,12 +75,12 @@ public:
       v_it = g.vertex_list.begin();
       return *this;
     }
-    VertexListIterator &end() { return g.vertex_list_end; }
-    VertexListIterator &next() {
-      ++v_it;
+    bool end() { return v_it == g.vertex_list.end(); }
+    VertexListIterator &operator++() {
       if (v_it == g.vertex_list.end()) {
-        return g.vertex_list_end;
+        return *this;
       }
+      ++v_it;
       return *this;
     }
     // get vertex at iterator position
@@ -89,6 +90,7 @@ public:
       }
       return *v_it;
     }
+    VertexListIterator &operator=(VertexListIterator &v_it) { return v_it; }
 
   private:
     friend class Graph;
@@ -111,13 +113,13 @@ public:
       return *this;
     }
     // Get the end of iteration
-    EdgeListIterator &end() { return g.edge_list_end; }
+    bool end() { return g.adj_list[source].end() == e_it; }
     // Move iterator to next position
-    EdgeListIterator &next() {
-      ++e_it;
+    EdgeListIterator &operator++() {
       if (e_it == g.adj_list[source].end()) {
-        return g.edge_list_end;
+        return *this;
       }
+      ++e_it;
       return *this;
     }
     // Get the edge at current iterator position
@@ -152,6 +154,7 @@ public:
   bool validVertex(const Vertex *v) {
     return vertex_list.find(v) == vertex_list.end();
   }
+  bool isDirected() { return directed; }
 
 private:
   // number of nodes in the graph
