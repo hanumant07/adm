@@ -11,6 +11,7 @@ typedef enum {
   kGraphErrorNoMem = -1,
   kGraphErrorBadArgs = -2,
   kGraphErrorSearchAbort = -3,
+  kGraphErrorNoPath = -4,
 } GraphError;
 
 //**************************************************************************************************
