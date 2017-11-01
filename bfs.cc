@@ -44,7 +44,7 @@ GraphError Bfs::PerformSearch() {
       break;
     }
     if (!discovered[curr_vertex]) {
-      discovered[curr_vertex] = true;
+
       err = PerformSearch(curr_vertex);
       if (err != kGraphErrorSuccess) {
         break;
@@ -75,6 +75,7 @@ GraphError Bfs::PerformSearch(const Vertex *start_vertex) {
     search_queue.pop();
   }
 
+  discovered[start_vertex] = true;
   this->search_queue.push(start_vertex);
 
   while (!this->search_queue.empty() && !terminate) {
@@ -85,11 +86,11 @@ GraphError Bfs::PerformSearch(const Vertex *start_vertex) {
 
     Graph::EdgeListIterator e_it(g, curr_vertex);
     const Edge *e;
+    processed[curr_vertex] = true;
 
     for (e_it.begin(); !e_it.end(); ++e_it) {
       e = e_it.getEdge();
       const Vertex *neighbor = e->getVertex();
-      processed[curr_vertex] = true;
 
       if (!processed[neighbor] || g.isDirected()) {
         ProcessEdge(curr_vertex, neighbor);
@@ -112,10 +113,14 @@ GraphError Bfs::PerformSearch(const Vertex *start_vertex) {
 //**************************************************************************************************
 
 GraphError Bfs::GetPathFromTo(const Vertex *from, const Vertex *to,
-                              std::list<const Vertex *> out_path) {
+                              std::list<const Vertex *> &out_path) {
 
   if (!from || !g.validVertex(from) || !to || !g.validVertex(to)) {
     return kGraphErrorBadArgs;
+  }
+
+  if (parent.empty()) {
+    return kGraphErrorNoPath;
   }
 
   if (from == to) {

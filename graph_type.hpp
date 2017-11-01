@@ -1,7 +1,9 @@
+#include <iostream>
 #include <stdexcept>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
+
+#pragma once
 
 //**************************************************************************************************
 // Types
@@ -23,6 +25,12 @@ public:
   Vertex(int i) : id(i) {}
   Vertex(int i, int w) : id(i), weight(w) {}
   int getWeight() { return weight; }
+  friend std::ostream &operator<<(std::ostream &os, const Vertex &v) {
+    os << v.id;
+    return os;
+  }
+  // return id
+  int getId() const { return id; }
 
 protected:
   // Weight of vertex
@@ -56,7 +64,7 @@ private:
 
 // List of edges and vertices
 typedef std::vector<const Edge *> EdgeList;
-typedef std::unordered_set<const Vertex *> VertexList;
+typedef std::unordered_map<int, const Vertex *> VertexList;
 
 //**************************************************************************************************
 // Graph class
@@ -89,7 +97,7 @@ public:
       if (v_it == g.vertex_list.end()) {
         throw std::range_error("Attempt to deref empty vertex list");
       }
-      return *v_it;
+      return v_it->second;
     }
     VertexListIterator &operator=(VertexListIterator &v_it) { return v_it; }
 
@@ -144,8 +152,8 @@ public:
     Graph &g;
   };
   // Graph Constructor
-  Graph(int n, int e, bool d)
-      : num_nodes(n), num_edges(e), directed(d), edge_list_end(*this),
+  Graph(int n, bool d)
+      : num_nodes(n), directed(d), edge_list_end(*this),
         vertex_list_end(*this) {}
   // Insert Edge variations
   GraphError InsertEdge(const Vertex *u, const Vertex *v, int weight);
@@ -153,7 +161,9 @@ public:
   GraphError InsertEdge(int v, int u, int weight);
   // Check if vertex is present in graph
   bool validVertex(const Vertex *v) {
-    return vertex_list.find(v) == vertex_list.end();
+    if (!v)
+      return false;
+    return vertex_list.find(v->getId()) != vertex_list.end();
   }
   bool isDirected() { return directed; }
 

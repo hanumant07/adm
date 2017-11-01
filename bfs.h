@@ -17,7 +17,7 @@ public:
   // running search first
   // it will return kGraphErrorNoPath.
   GraphError GetPathFromTo(const Vertex *from, const Vertex *to,
-                           std::list<const Vertex *> out_path);
+                           std::list<const Vertex *> &out_path);
   virtual ~Bfs();
 
 protected:
