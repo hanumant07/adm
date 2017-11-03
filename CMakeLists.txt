@@ -21,5 +21,8 @@ add_library(graphs STATIC ${LIB_SOURCES})
 #exe sources
 file(GLOB EXE_SOURCES "testtool.c")
 
-add_executable(graphtesttool "testtool.cc")
-target_link_libraries(graphtesttool graphs)
+#add_executable(graphtesttool "testtool.cc")
+#target_link_libraries(graphtesttool graphs)
+
+add_executable(twocolor "apps/twocolor.cc")
+target_link_libraries(twocolor graphs)

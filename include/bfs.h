@@ -26,6 +26,9 @@ protected:
   virtual void ProcessVertexEarly(const Vertex *v) {}
   virtual void ProcessVertexLate(const Vertex *v) {}
   virtual void ProcessEdge(const Vertex *curr, const Vertex *end) {}
+  Graph &GetGraphInstance() { return g; }
+  // terminate search
+  bool terminate;
 
 private:
   Bfs(const Bfs &);
@@ -39,6 +42,4 @@ private:
   // queue for breadth first search
   std::queue<const Vertex *> search_queue;
   Graph &g;
-  // terminate search
-  bool terminate;
 };

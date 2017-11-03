@@ -33,9 +33,11 @@ Bfs::~Bfs() {
 // Perform Search
 //**************************************************************************************************
 GraphError Bfs::PerformSearch() {
-  GraphError err;
   const Vertex *curr_vertex;
   Graph::VertexListIterator v_it(g);
+  GraphError err;
+
+  err = kGraphErrorSuccess;
 
   for (v_it.begin(); !v_it.end(); ++v_it) {
     curr_vertex = v_it.getVertex();
@@ -87,7 +89,7 @@ GraphError Bfs::PerformSearch(const Vertex *start_vertex) {
     const Edge *e;
     processed[curr_vertex] = true;
 
-    for (e_it.begin(); !e_it.end(); ++e_it) {
+    for (e_it.begin(); !e_it.end() && !terminate; ++e_it) {
       e = e_it.getEdge();
       const Vertex *neighbor = e->getVertex();
 
@@ -102,6 +104,9 @@ GraphError Bfs::PerformSearch(const Vertex *start_vertex) {
       }
     }
     ProcessVertexLate(curr_vertex);
+  }
+  if (terminate) {
+    return kGraphErrorSearchAbort;
   }
   return kGraphErrorSuccess;
 }
